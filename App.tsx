@@ -58,6 +58,7 @@ import { getDailyBriefing } from './services/geminiService';
 import InventoryVouchers from './pages/InventoryVouchers';
 import InventoryRequisitions from './pages/InventoryRequisitions';
 import InventoryMovementsPage from './pages/InventoryMovementsPage';
+import SupplyChain from './pages/SupplyChain';
 
 // FIX: AuthContext moved to types.ts to solve circular dependency. It's now imported here.
 import { User, Role, PurchaseInvoice, Sale, EmployeeData, RenewableItem, Branch, Product, InventoryItem, LeaveRequest, AttendanceRecord, SalaryPayment, RequestStatus, Customer, Expense, FinancialAccount, POSSession, ManufacturingOrder, ChatbotDataContext, InventoryAdjustmentLog, AdjustmentReason, ProductionTask, Account, IntegrationSettings, AdvanceRequest, GeneralRequest, Supplier, PurchaseRequest, PurchaseOrder, PurchaseReturn, SupplierPayment, DebitNote, RequestForQuotation, PurchaseQuotation, SalesQuotation, SalesReturn, CreditNote, RecurringInvoice, CustomerPayment, DailyBriefingContext, InventoryVoucher, InventoryRequisition, PurchaseSettings, JournalVoucher, WhatsappLog, Permission, Project, Webhook, WebhookEvent, AuthContext } from './types';
@@ -189,10 +190,10 @@ const employees = createGenericSlice<EmployeeData>('employees', createApiThunks<
 const customers = createGenericSlice<Customer>('customers', createApiThunks<Customer>('customers'));
 const suppliers = createGenericSlice<Supplier>('suppliers', createApiThunks<Supplier>('suppliers'));
 const branches = createGenericSlice<Branch>('branches', createApiThunks<Branch>('branches'));
-const inventory = createGenericSlice<InventoryItem>('inventory', createApiThunks<InventoryItem>('inventory', 'branchinventories', transformInventoryResponse));
+const inventory = createGenericSlice<InventoryItem>('inventory', createApiThunks<InventoryItem>('inventory', 'inventory', transformInventoryResponse));
 const expenses = createGenericSlice<Expense>('expenses', createApiThunks<Expense>('expenses'));
 const financialAccounts = createGenericSlice<FinancialAccount>('financialAccounts', createApiThunks<FinancialAccount>('financialaccounts'));
-const manufacturingOrders = createGenericSlice<ManufacturingOrder>('manufacturingOrders', createApiThunks<ManufacturingOrder>('manufacturingorders'));
+const manufacturingOrders = createGenericSlice<ManufacturingOrder>('manufacturingOrders', createApiThunks<ManufacturingOrder>('manufacturing_orders'));
 const stockAdjustments = createGenericSlice<InventoryAdjustmentLog>('stockAdjustments', createApiThunks<InventoryAdjustmentLog>('stockadjustments'));
 const salesQuotations = createGenericSlice<SalesQuotation>('salesQuotations', createApiThunks<SalesQuotation>('salesquotations'));
 const salesReturns = createGenericSlice<SalesReturn>('salesReturns', createApiThunks<SalesReturn>('salesreturns'));
@@ -202,7 +203,7 @@ const customerPayments = createGenericSlice<CustomerPayment>('customerPayments',
 const inventoryVouchers = createGenericSlice<InventoryVoucher>('inventoryVouchers', createApiThunks<InventoryVoucher>('inventoryvouchers'));
 const inventoryRequisitions = createGenericSlice<InventoryRequisition>('inventoryRequisitions', createApiThunks<InventoryRequisition>('inventoryrequisitions'));
 const communications = createGenericSlice<WhatsappLog>('communications', createApiThunks<WhatsappLog>('communications'));
-const purchaseOrders = createGenericSlice<PurchaseOrder>('purchaseOrders', createApiThunks<PurchaseOrder>('supplyorders'));
+const purchaseOrders = createGenericSlice<PurchaseOrder>('purchaseOrders', createApiThunks<PurchaseOrder>('purchaseorders'));
 
 
 const store = configureStore({
@@ -232,7 +233,7 @@ const AppContent: React.FC = () => {
 
     const allUsers = useAppSelector(entitySelectors.users.selectAll); const allProducts = useAppSelector(entitySelectors.products.selectAll); const allSales = useAppSelector(entitySelectors.sales.selectAll); const allPurchases = useAppSelector(entitySelectors.purchases.selectAll); const allEmployees = useAppSelector(entitySelectors.employees.selectAll); const allCustomers = useAppSelector(entitySelectors.customers.selectAll); const allSuppliers = useAppSelector(entitySelectors.suppliers.selectAll); const allBranches = useAppSelector(entitySelectors.branches.selectAll); const allInventory = useAppSelector(entitySelectors.inventory.selectAll); const allExpenses = useAppSelector(entitySelectors.expenses.selectAll); const allFinancialAccounts = useAppSelector(entitySelectors.financialAccounts.selectAll); const allManufacturingOrders = useAppSelector(entitySelectors.manufacturingOrders.selectAll); const allInventoryAdjustmentLogs = useAppSelector(entitySelectors.stockAdjustments.selectAll); const allSalesQuotations = useAppSelector(entitySelectors.salesQuotations.selectAll); const allSalesReturns = useAppSelector(entitySelectors.salesReturns.selectAll); const allCreditNotes = useAppSelector(entitySelectors.creditNotes.selectAll); const allRecurringInvoices = useAppSelector(entitySelectors.recurringInvoices.selectAll); const allCustomerPayments = useAppSelector(entitySelectors.customerPayments.selectAll); const allInventoryVouchers = useAppSelector(entitySelectors.inventoryVouchers.selectAll); const allInventoryRequisitions = useAppSelector(entitySelectors.inventoryRequisitions.selectAll); const allWhatsappLogs = useAppSelector(entitySelectors.communications.selectAll); const allPurchaseOrders = useAppSelector(entitySelectors.purchaseOrders.selectAll);
     
-    const dataStatus = useAppSelector(state => ({ users: state.users.status, products: state.products.status, sales: state.sales.status, purchases: state.purchases.status }));
+    const dataStatus = useAppSelector(state => ({ products: state.products.status, sales: state.sales.status, purchases: state.purchases.status }));
     const isLoading = Object.values(dataStatus).some(s => s === 'loading');
     const isInitialLoad = Object.values(dataStatus).some(s => s === 'idle');
 
@@ -265,7 +266,7 @@ const AppContent: React.FC = () => {
     const [isBriefingLoading, setIsBriefingLoading] = useState(false);
 
     useEffect(() => {
-        dispatch(users.thunks.fetchAll());
+        // dispatch(users.thunks.fetchAll()); // No API yet
         dispatch(products.thunks.fetchAll());
         dispatch(sales.thunks.fetchAll());
         dispatch(purchases.thunks.fetchAll());
@@ -277,19 +278,19 @@ const AppContent: React.FC = () => {
         dispatch(expenses.thunks.fetchAll());
         dispatch(financialAccounts.thunks.fetchAll());
         dispatch(manufacturingOrders.thunks.fetchAll());
-        dispatch(stockAdjustments.thunks.fetchAll());
-        dispatch(salesQuotations.thunks.fetchAll());
-        dispatch(salesReturns.thunks.fetchAll());
-        dispatch(creditNotes.thunks.fetchAll());
-        dispatch(recurringInvoices.thunks.fetchAll());
-        dispatch(customerPayments.thunks.fetchAll());
+        // dispatch(stockAdjustments.thunks.fetchAll()); // No API yet
+        // dispatch(salesQuotations.thunks.fetchAll()); // No API yet
+        // dispatch(salesReturns.thunks.fetchAll()); // No API yet
+        // dispatch(creditNotes.thunks.fetchAll()); // No API yet
+        // dispatch(recurringInvoices.thunks.fetchAll()); // No API yet
+        // dispatch(customerPayments.thunks.fetchAll()); // No API yet
         dispatch(inventoryVouchers.thunks.fetchAll());
         dispatch(inventoryRequisitions.thunks.fetchAll());
-        dispatch(communications.thunks.fetchAll());
+        // dispatch(communications.thunks.fetchAll()); // No API yet
         dispatch(purchaseOrders.thunks.fetchAll());
     }, [dispatch]);
 
-    const activeSession = useMemo(() => posSessions.find(s => s.status === 'Open' && s.branchId === user?.branchId), [posSessions, user]);
+    const activeSession = useMemo(() => posSessions.find(s => s.status === 'Open' && (!user?.branchId || s.branchId === user.branchId)), [posSessions, user]);
     
     useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
     useEffect(() => { const handleMouseMove = (e: MouseEvent) => { document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`); document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`); }; document.addEventListener('mousemove', handleMouseMove); return () => document.removeEventListener('mousemove', handleMouseMove); }, []);
@@ -297,19 +298,29 @@ const AppContent: React.FC = () => {
     const authContextValue = useMemo(() => ({
         user,
         login: (role: Role) => {
-            const loggedInUser = allUsers.find(u => u.role === role);
-            if (loggedInUser) {
-                setUser(loggedInUser);
-                switch (role) {
-                    case Role.ShopAssistant: setActiveView('POS/Start'); break;
-                    case Role.Perfumer: setActiveView('Manufacturing/Orders'); break;
-                    case Role.Employee: setActiveView('MyProfile'); break;
-                    default: setActiveView('Dashboard'); break;
-                }
+            let loggedInUser = allUsers.find(u => u.role === role);
+            // If no users from API, create a mock user for the selected role
+            if (!loggedInUser) {
+                loggedInUser = {
+                    id: `mock-${role}`,
+                    name: role,
+                    username: role,
+                    password: '',
+                    role: role,
+                    branchId: allBranches[0]?.id,
+                    permissions: PERMISSIONS[role] || []
+                };
+            }
+            setUser(loggedInUser);
+            switch (role) {
+                case Role.ShopAssistant: setActiveView('POS/Start'); break;
+                case Role.Perfumer: setActiveView('Manufacturing/Orders'); break;
+                case Role.Employee: setActiveView('MyProfile'); break;
+                default: setActiveView('Dashboard'); break;
             }
         },
         logout: () => setUser(null)
-    }), [user, allUsers]);
+    }), [user, allUsers, allBranches]);
 
     const checkAndSendRenewalReminders = () => { return false };
     const handleGenerateBriefing = () => {};
@@ -350,10 +361,10 @@ const AppContent: React.FC = () => {
     const handleSaveAndCloseProductModal = async (productToSave: Product) => { try { await handleSaveProduct(productToSave); handleCloseProductModal(); } catch (error) {} };
 
     const handleConvertQuoteToInvoice = async (quotation: SalesQuotation) => {
-        if (!user?.branchId) return;
+        // if (!user?.branchId) return;
         const customer = allCustomers.find(c => c.id === quotation.customerId);
         if(!customer) return;
-        const newSale: Partial<Sale> = { brand: 'Arabiva', branchId: user.branchId, customerName: customer.name, customerId: customer.id, date: new Date().toISOString().split('T')[0], paymentMethod: 'Credit', paymentStatus: 'Pending', items: quotation.items.map(item => ({...item, id: Date.now() + Math.random() })), totalAmount: quotation.totalAmount, quotationId: quotation.id };
+        const newSale: Partial<Sale> = { brand: 'Arabiva', branchId: user?.branchId || allBranches[0]?.id, customerName: customer.name, customerId: customer.id, date: new Date().toISOString().split('T')[0], paymentMethod: 'Credit', paymentStatus: 'Pending', items: quotation.items.map(item => ({...item, id: Date.now() + Math.random() })), totalAmount: quotation.totalAmount, quotationId: quotation.id };
         await handleSaveSale(newSale as Sale);
         await dispatchCrudAction(salesQuotations.thunks, {...quotation, status: 'Accepted'}, 'Sales Quotation');
         addToast(`Quotation #${quotation.quoteNumber} converted to invoice.`, 'success');
@@ -383,13 +394,13 @@ const AppContent: React.FC = () => {
     const chatbotDataContext = useMemo(() => ({ sales: allSales, purchases: allPurchases, products: allProducts, inventory: allInventory, customers: allCustomers, employees: allEmployees, branches: allBranches, expenses: allExpenses, suppliers: allSuppliers, }), [allSales, allPurchases, allProducts, allInventory, allCustomers, allEmployees, allBranches, allExpenses, allSuppliers]);
     const lowStockItemsCount = useMemo(() => allInventory.filter(i => i.quantity <= i.minStock && i.minStock > 0).length, [allInventory]);
     const totalPendingHRRequests = leaveRequests.filter(r => r.status === 'Pending').length + advanceRequests.filter(r => r.status === 'Pending').length + generalRequests.filter(r => r.status === 'Pending').length;
-    const sessionsForView = useMemo(() => (user?.role === Role.BranchManager || user?.role === Role.ShopAssistant) ? posSessions.filter(s => s.branchId === user.branchId) : posSessions, [posSessions, user]);
+    const sessionsForView = useMemo(() => (user?.role === Role.BranchManager || user?.role === Role.ShopAssistant) && user?.branchId ? posSessions.filter(s => s.branchId === user.branchId) : posSessions, [posSessions, user]);
     const isBranchScopedUser = useMemo(() => user?.role === Role.BranchManager || user?.role === Role.ShopAssistant, [user]);
-    const salesForView = useMemo(() => isBranchScopedUser ? allSales.filter(s => s.branchId === user!.branchId) : allSales, [allSales, user, isBranchScopedUser]);
-    const purchaseInvoicesForView = useMemo(() => isBranchScopedUser ? allPurchases.filter(p => p.branchId === user!.branchId) : allPurchases, [allPurchases, user, isBranchScopedUser]);
-    const inventoryForView = useMemo(() => isBranchScopedUser ? allInventory.filter(i => i.branchId === user!.branchId) : allInventory, [allInventory, user, isBranchScopedUser]);
-    const employeesForView = useMemo(() => isBranchScopedUser ? allEmployees.filter(e => e.branchId === user!.branchId) : allEmployees, [allEmployees, user, isBranchScopedUser]);
-    const expensesForView = useMemo(() => isBranchScopedUser ? allExpenses.filter(e => e.branchId === user!.branchId) : allExpenses, [allExpenses, user, isBranchScopedUser]);
+    const salesForView = useMemo(() => isBranchScopedUser && user?.branchId ? allSales.filter(s => s.branchId === user.branchId) : allSales, [allSales, user, isBranchScopedUser]);
+    const purchaseInvoicesForView = useMemo(() => isBranchScopedUser && user?.branchId ? allPurchases.filter(p => p.branchId === user.branchId) : allPurchases, [allPurchases, user, isBranchScopedUser]);
+    const inventoryForView = useMemo(() => isBranchScopedUser && user?.branchId ? allInventory.filter(i => i.branchId === user.branchId) : allInventory, [allInventory, user, isBranchScopedUser]);
+    const employeesForView = useMemo(() => isBranchScopedUser && user?.branchId ? allEmployees.filter(e => e.branchId === user.branchId) : allEmployees, [allEmployees, user, isBranchScopedUser]);
+    const expensesForView = useMemo(() => isBranchScopedUser && user?.branchId ? allExpenses.filter(e => e.branchId === user.branchId) : allExpenses, [allExpenses, user, isBranchScopedUser]);
 
     if (!user) { return ( <AuthContext.Provider value={authContextValue}> <LoginScreen /> </AuthContext.Provider> ); }
     if (isInitialLoad) { return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '1.5rem', color: 'var(--text-primary)' }}>Loading application data...</div>; }
@@ -447,12 +458,13 @@ const AppContent: React.FC = () => {
         if (activeView.startsWith('Renewals')) return <Licenses renewables={renewables} setRenewables={setRenewables} onCheckReminders={checkAndSendRenewalReminders} />;
         if (activeView.startsWith('Reports')) return <Reports sales={salesForView} purchases={purchaseInvoicesForView} products={allProducts} branches={allBranches} expenses={expensesForView} customers={allCustomers} financialAccounts={allFinancialAccounts} activeReport={activeView} suppliers={allSuppliers} />;
         if (activeView.startsWith('Settings/General')) return <Settings settings={settings} setSettings={setSettings} />;
-        if (['Settings/Inventory', 'Settings/Products'].includes(activeView)) { return <div className="glass-pane" style={{padding: '2rem', textAlign: 'center'}}>Coming Soon: {activeView.split('/[1]'}</div> }
+        if (['Settings/Inventory', 'Settings/Products'].includes(activeView)) { return <div className="glass-pane" style={{padding: '2rem', textAlign: 'center'}}>Coming Soon: {activeView.split('/')[1]}</div> }
         if (activeView.startsWith('Settings/Sales')) return <SettingsSales />;
         if (activeView.startsWith('Settings/Purchases')) return <SettingsPurchases settings={purchaseSettings} onSave={handleSavePurchaseSettings} />;
         if (activeView.startsWith('Settings/Suppliers')) return <SettingsSuppliers />;
         if (activeView.startsWith('Settings/Integrations')) return <IntegrationsPage settings={integrationSettings} onSave={handleSaveIntegrations} />;
         if (activeView.startsWith('Users')) return <UsersPage users={allUsers} branches={allBranches} onSave={handleSaveUser} onViewPermissions={setViewingPermissionsFor} PERMISSION_GROUPS={PERMISSION_GROUPS} />;
+        if (activeView.startsWith('SupplyChain')) return <SupplyChain />;
         
         return <Dashboard sales={salesForView} purchases={purchaseInvoicesForView} employees={employeesForView} inventory={inventoryForView} products={allProducts} branches={allBranches} settings={settings} accounts={chartOfAccounts} expenses={expensesForView} renewables={renewables} leaveRequests={leaveRequests} advanceRequests={advanceRequests} generalRequests={generalRequests} suppliers={allSuppliers} />;
     };

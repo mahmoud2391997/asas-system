@@ -65,6 +65,7 @@ const translations: { [key: string]: string } = {
     'Inventory/Vouchers': 'إدارة الإذون المخزنية',
     'Inventory/Requisitions': 'الطلبيات المخزنية',
     'Inventory/Stocktakes': 'إدارة الجرد',
+    'SupplyChain': 'إدارة سلسلة التوريد',
     Customers: 'العملاء',
     Expenses: 'المصروفات',
     'Finance/Expenses': 'إدارة المصروفات',
