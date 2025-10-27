@@ -9,15 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "recharts": "^3.2.1",
     "@google/genai": "^1.22.0",
+    "@reduxjs/toolkit": "2.2.5",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "qrcode": "^1.5.3",
-    "@reduxjs/toolkit": "2.2.5",
-    "react-redux": "9.1.2"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-is": "^19.2.0",
+    "react-redux": "9.1.2",
+    "recharts": "^3.2.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

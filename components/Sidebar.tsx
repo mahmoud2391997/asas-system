@@ -55,6 +55,7 @@ const allNavItems: NavItem[] = [
             { name: 'إدارة الإذون المخزنية', view: 'Inventory/Vouchers' },
             { name: 'الطلبيات المخزنية', view: 'Inventory/Requisitions' },
             { name: 'تتبع المنتجات', view: 'Inventory/Tracking' },
+            { name: 'سلسلة التوريد', view: 'SupplyChain' },
             { name: 'قوائم الأسعار', view: 'Inventory/Pricelists' },
             { name: 'المستودعات', view: 'Branches' },
             { name: 'إدارة الجرد', view: 'Inventory/Stocktakes' },
